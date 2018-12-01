@@ -1,5 +1,6 @@
 package org.itstep.msk;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,9 +15,9 @@ import java.util.Iterator;
  * @version 1.0
  * */
 public interface SimpleContactBook {
-    Contact create(String name, String phoneNumber);
-    SimpleContactBook delete(Contact c);
-    Iterable<Contact> read();
+    ExtendContact create(String name, String phoneNumber);
+    SimpleContactBook delete(ExtendContact c);
+    Iterable<ExtendContact> read();
     SimpleContactBook commit();
 }
 
@@ -31,19 +32,19 @@ public interface SimpleContactBook {
 
 class ContactBook implements SimpleContactBook {
 
-    private HashSet<Contact> ContactBookSet = null;
+    private HashSet<ExtendContact> ContactBookSet = null;
 
     ContactBook(){
         ContactBookSet = new HashSet<>();
     }
 
-    ContactBook(Collection<Contact> cont){
+    ContactBook(Collection<ExtendContact> cont){
         ContactBookSet = new HashSet<>(cont);
     }
 
 
-    public Contact create(String name, String phoneNumber) {
-        Contact newContact = new Contact(name, phoneNumber);
+    public ExtendContact create(String name, String phoneNumber) {
+        ExtendContact newContact = new ExtendContact(new Contact(name, phoneNumber));
         if(ContactBookSet.contains(newContact))
             return null;
         else
@@ -52,20 +53,33 @@ class ContactBook implements SimpleContactBook {
     }
 
 
-    public Iterable<Contact> read() {
-        Iterator<Contact> it = ContactBookSet.iterator();
+    public Iterable<ExtendContact> read() {
+        Iterator<ExtendContact> it = ContactBookSet.iterator();
 
         while(it.hasNext()) {
-            Contact tmp = it.next();
+            ExtendContact tmp = it.next();
             //тут должен использоваться метод print для вывода getName() и т.п. объекта tmp.
         }
         return null;
     }
 
-    public ContactBook delete(Contact c){
+    public ContactBook delete(ExtendContact c){
         if(ContactBookSet.contains(c))
             ContactBookSet.remove(c);
         return this;
+    }
+
+    public Iterable<ExtendContact> FindName(String SearchName){
+        ArrayList<ExtendContact> resultSearch = new ArrayList<>();
+        Iterator<ExtendContact> it = ContactBookSet.iterator();
+
+        while(it.hasNext()) {
+            ExtendContact CurrentContact = it.next();
+            if(CurrentContact.getFirstName().substring(0, SearchName.length()).equalsIgnoreCase(SearchName)){
+                resultSearch.add(CurrentContact);
+            }
+        }
+        return resultSearch;
     }
 
     public ContactBook commit(){
@@ -74,25 +88,5 @@ class ContactBook implements SimpleContactBook {
     }
 
 
-/*
-    Для класса Contact надо переопредлить hashCode() и equals например так:
 
-    @Override
-    public boolean equals(Object obj){
-        if (!(obj instanceof Contact))
-            return false;
-        Contact entry = (Contact)obj;
-        return Name.equals(entry.Name) && phoneNumber.equals(entry.phoneNumber);
-    }
-
-    @Override
-    public int hashCode(){
-        int hash = 37;
-        hash = hash*17 + Name.hashCode();
-        hash = hash*17 + phoneNumber.hashCode();
-        return hash;
-    }
-
-
- */
 }
